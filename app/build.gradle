@@ -1,0 +1,131 @@
+plugins {
+    id 'com.android.application'
+    id 'kotlin-kapt'
+    id 'org.jetbrains.kotlin.android'
+    id 'androidx.navigation.safeargs'
+    id 'com.jakewharton.butterknife'
+}
+
+def keystorePropertiesFile = rootProject.file("app1.properties")
+def attrs = new Properties()
+attrs.load(new FileInputStream(keystorePropertiesFile))
+
+android {
+    namespace = "com.example.myussd"
+    signingConfigs {
+        config {
+            keyAlias attrs['keyAlias']
+            keyPassword attrs['password']
+            storeFile file(attrs['storeFile'] == null ? "build.gradle" : attrs['storeFile'])
+            storePassword attrs['password']
+        }
+    }
+    compileSdk 34
+    buildToolsVersion "29.0.2"
+    defaultConfig {
+        configurations.all {
+            resolutionStrategy { force 'androidx.core:core:1.8.0' }
+        }
+
+        applicationId "com.example.myussd"
+        minSdkVersion 23
+        targetSdkVersion 34
+        versionCode 13
+        versionName "1.13.a"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        testInstrumentationRunnerArguments["clearPackageData"] = "true"
+        signingConfig signingConfigs.config
+    }
+    buildFeatures {
+        dataBinding true
+        viewBinding = true
+
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+    flavorDimensions "version"
+    productFlavors {
+        demo {
+            dimension "version"
+            applicationIdSuffix ".demo"
+//            versionNameSuffix "-demo"
+        }
+        publish {
+            dimension "version"
+            versionNameSuffix "-publish"
+        }
+    }
+    lintOptions {
+        abortOnError false
+    }
+    android.variantFilter { variant ->
+        if ((variant.buildType.name == 'release'
+                && variant.getFlavors().get(0).name == 'demo')
+                || (variant.buildType.name == 'debug'
+                && variant.getFlavors().get(0).name == 'publish'))
+            variant.setIgnore(true)
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+
+    applicationVariants.all { variant ->
+        variant.outputs.all {
+            outputFileName = "${project.rootProject.name}-${variant.name}.apk"
+        }
+    }
+
+}
+
+
+dependencies {
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'androidx.appcompat:appcompat:1.7.0-alpha03'
+
+    implementation 'com.google.android.material:material:1.11.0-alpha03'
+
+    implementation 'com.orhanobut:logger:2.2.0'
+    implementation 'com.jakewharton.timber:timber:5.0.1'
+
+    implementation "org.jetbrains.kotlin:kotlin-reflect:1.9.0"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.9.0"
+
+    implementation 'com.google.android.play:core:1.10.3'
+
+    implementation "androidx.lifecycle:lifecycle-livedata-ktx:2.6.2"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.2"
+    implementation "androidx.lifecycle:lifecycle-viewmodel-savedstate:2.6.2"
+    implementation "androidx.lifecycle:lifecycle-service:2.6.2"
+    implementation "androidx.appcompat:appcompat:1.6.1"
+
+    implementation "androidx.navigation:navigation-fragment-ktx:2.7.3"
+    implementation "androidx.navigation:navigation-ui-ktx:2.7.3"
+    def koin = "2.0.1"
+    def dagger_version = '2.47'
+    implementation "com.google.dagger:dagger:$dagger_version"
+    kapt "com.google.dagger:dagger-compiler:$dagger_version"
+    implementation 'io.reactivex.rxjava2:rxjava:2.2.21'
+    implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'
+
+    implementation 'com.airbnb.android:lottie:6.1.0'
+    implementation 'com.google.android.material:material:1.11.0-alpha03'
+
+    implementation 'androidx.lifecycle:lifecycle-extensions:2.2.0'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:10.2.3'
+    implementation 'com.jakewharton:butterknife:10.2.3'
+
+}
+dependencies {
+
+    androidTestImplementation 'com.kaspersky.android-components:kaspresso:1.5.2'
+}
